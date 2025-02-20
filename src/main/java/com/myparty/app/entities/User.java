@@ -2,6 +2,8 @@ package com.myparty.app.entities;
 
 import jakarta.persistence.*;
 import java.util.UUID;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import com.myparty.app.controller.dto.LoginRequest;
 
 @Entity
 @Table(name = "tb_users")
@@ -31,6 +33,7 @@ public class User {
 	}
 
 	public enum Role {
+		ADMIN("Admin"),
 		ORGANIZER("Organizer"),
 		PARTICIPANT("Participant");
 
@@ -55,6 +58,17 @@ public class User {
 	}
 
 	public User() {
+	}
+
+	@Override public String toString() {
+		return "User{" +
+				"userId=" + userId +
+				", username='" + username + '\'' +
+				", password='" + password + '\'' +
+				", phoneNumber='" + phoneNumber + '\'' +
+				", role=" + role +
+				", isStudent=" + isStudent +
+				'}';
 	}
 
 	public User(UUID userId, String username, String password, String phoneNumber, Role role, Boolean isStudent) {
