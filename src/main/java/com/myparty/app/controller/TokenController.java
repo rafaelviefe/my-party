@@ -12,26 +12,26 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import com.myparty.app.controller.dto.LoginRequest;
 import com.myparty.app.controller.dto.LoginResponse;
-import com.myparty.app.service.TokenService;
+import com.myparty.app.service.UserService;
 import jakarta.validation.Valid;
 
 @RestController
 public class TokenController {
 
 	private final JwtEncoder jwtEncoder;
-	private final TokenService tokenService;
+	private final UserService userService;
 	private BCryptPasswordEncoder passwordEncoder;
 
-	public TokenController(BCryptPasswordEncoder passwordEncoder, TokenService tokenService, JwtEncoder jwtEncoder) {
+	public TokenController(BCryptPasswordEncoder passwordEncoder, UserService userService, JwtEncoder jwtEncoder) {
 		this.passwordEncoder = passwordEncoder;
-		this.tokenService = tokenService;
+		this.userService = userService;
 		this.jwtEncoder = jwtEncoder;
 	}
 
 	@PostMapping("/login")
 	public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest loginRequest) {
 
-		var user = tokenService.findByUsername(loginRequest.username());
+		var user = userService.findByUsername(loginRequest.username());
 
 		if (user.isEmpty() || !user.get().isLoginCorrect(loginRequest, passwordEncoder)) {
 			throw new BadCredentialsException("username or password is invalid!");
