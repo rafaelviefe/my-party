@@ -15,7 +15,7 @@ import com.myparty.app.controller.dto.LoginResponse;
 import com.myparty.app.service.TokenService;
 import jakarta.validation.Valid;
 
-@RestController("/login")
+@RestController
 public class TokenController {
 
 	private final JwtEncoder jwtEncoder;
