@@ -26,6 +26,10 @@ public class User {
 	@Column(name = "is_student")
 	private Boolean isStudent;
 
+	public boolean isLoginCorrect(LoginRequest loginRequest, PasswordEncoder passwordEncoder) {
+		return passwordEncoder.matches(loginRequest.password(), this.password);
+	}
+
 	public enum Role {
 		ORGANIZER("Organizer"),
 		PARTICIPANT("Participant");
