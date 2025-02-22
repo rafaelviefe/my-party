@@ -1,8 +1,8 @@
 package com.myparty.app.controller.dto;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 
 public record CreateTicketDto(
-		@NotNull Long eventId
+		@NotBlank Long eventId
 ) {
 }

@@ -13,6 +13,7 @@ import com.myparty.app.entities.Ticket;
 import com.myparty.app.service.EventService;
 import com.myparty.app.service.TicketService;
 import com.myparty.app.service.UserService;
+import jakarta.validation.Valid;
 
 @RestController
 public class TicketController {
@@ -28,7 +29,7 @@ public class TicketController {
 	}
 
 	@PostMapping("/tickets")
-	public ResponseEntity<Void> newTicket(@RequestBody CreateTicketDto dto, JwtAuthenticationToken token) {
+	public ResponseEntity<Void> newTicket(@RequestBody @Valid CreateTicketDto dto, JwtAuthenticationToken token) {
 
 		var user = userService.findById(UUID.fromString(token.getName()))
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
