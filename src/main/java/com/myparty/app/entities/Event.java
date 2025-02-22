@@ -23,6 +23,7 @@ public class Event {
 	@JoinColumn(name = "organizer_id", referencedColumnName = "user_id")
 	private User organizer;
 
+	@Column(unique = true)
 	private String title;
 
 	private String description;

@@ -12,6 +12,10 @@ public class EventService {
 
 	public EventService(EventRepository eventRepository) {this.eventRepository = eventRepository;}
 
+	public void save(Event event) {eventRepository.save(event);}
+
 	public Optional<Event> findById(Long id) {return eventRepository.findById(id);}
+
+	public Optional<Event> findByTitle(String title) {return eventRepository.findByTitle(title);}
 
 }
