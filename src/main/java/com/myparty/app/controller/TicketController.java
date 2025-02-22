@@ -34,15 +34,10 @@ public class TicketController {
 		var user = userService.findById(UUID.fromString(token.getName()))
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-		var event = eventService.findById(dto.eventId())
+		var event = eventService.findByTitle(dto.eventTitle())
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
 
-		var newTicket = new Ticket();
-		newTicket.setUser(user);
-		newTicket.setEvent(event);
-		newTicket.setStatus(Ticket.Status.PENDING);
-
-		ticketService.save(newTicket);
+		ticketService.createTicket(user, event);
 
 		// TODO: program a service that will approve or reject the request in 5 minutes
 
