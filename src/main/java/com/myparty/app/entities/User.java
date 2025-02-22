@@ -3,7 +3,7 @@ package com.myparty.app.entities;
 import jakarta.persistence.*;
 import java.util.UUID;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import com.myparty.app.controller.dto.LoginRequest;
+import com.myparty.app.controller.dto.LoginRequestDto;
 
 @Entity
 @Table(name = "tb_users")
@@ -28,8 +28,8 @@ public class User {
 	@Column(name = "is_student")
 	private Boolean isStudent;
 
-	public boolean isLoginCorrect(LoginRequest loginRequest, PasswordEncoder passwordEncoder) {
-		return passwordEncoder.matches(loginRequest.password(), this.password);
+	public boolean isLoginCorrect(LoginRequestDto loginRequestDto, PasswordEncoder passwordEncoder) {
+		return passwordEncoder.matches(loginRequestDto.password(), this.password);
 	}
 
 	public enum Role {

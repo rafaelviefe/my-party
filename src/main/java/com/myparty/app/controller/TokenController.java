@@ -10,49 +10,49 @@ import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import com.myparty.app.controller.dto.LoginRequest;
-import com.myparty.app.controller.dto.LoginResponse;
-import com.myparty.app.service.TokenService;
+import com.myparty.app.controller.dto.LoginRequestDto;
+import com.myparty.app.controller.dto.LoginResponseDto;
+import com.myparty.app.service.UserService;
 import jakarta.validation.Valid;
 
-@RestController("/login")
+@RestController
 public class TokenController {
 
 	private final JwtEncoder jwtEncoder;
-	private final TokenService tokenService;
+	private final UserService userService;
 	private BCryptPasswordEncoder passwordEncoder;
 
-	public TokenController(BCryptPasswordEncoder passwordEncoder, TokenService tokenService, JwtEncoder jwtEncoder) {
+	public TokenController(BCryptPasswordEncoder passwordEncoder, UserService userService, JwtEncoder jwtEncoder) {
 		this.passwordEncoder = passwordEncoder;
-		this.tokenService = tokenService;
+		this.userService = userService;
 		this.jwtEncoder = jwtEncoder;
 	}
 
 	@PostMapping("/login")
-	public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest loginRequest) {
+	public ResponseEntity<LoginResponseDto> login(@RequestBody @Valid LoginRequestDto loginRequestDto) {
 
-		var user = tokenService.findByUsername(loginRequest.username());
+		var user = userService.findByUsername(loginRequestDto.username());
 
-		if (user.isEmpty() || !user.get().isLoginCorrect(loginRequest, passwordEncoder)) {
+		if (user.isEmpty() || !user.get().isLoginCorrect(loginRequestDto, passwordEncoder)) {
 			throw new BadCredentialsException("username or password is invalid!");
 		}
 
 		var now = Instant.now();
 		var expiresIn = 3000L;
 
-		var scopes = user.get().getRole();
+		var scope = user.get().getRole();
 
 		var claims = JwtClaimsSet.builder()
 				.issuer("mypartydb")
 				.subject(user.get().getUserId().toString())
 				.issuedAt(now)
 				.expiresAt(now.plusSeconds(expiresIn))
-				.claim("scope", scopes)
+				.claim("scope", scope)
 				.build();
 
 		var jwtValue = jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
 
-		return ResponseEntity.ok(new LoginResponse(jwtValue, expiresIn));
+		return ResponseEntity.ok(new LoginResponseDto(jwtValue, expiresIn));
 	}
 
 }

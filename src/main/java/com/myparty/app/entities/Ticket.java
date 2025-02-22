@@ -25,6 +25,13 @@ public class Ticket {
 	public Ticket() {
 	}
 
+	public Ticket(Long ticketId, User user, Event event, Status status) {
+		this.ticketId = ticketId;
+		this.user = user;
+		this.event = event;
+		this.status = status;
+	}
+
 	public Long getTicketId() {
 		return ticketId;
 	}
