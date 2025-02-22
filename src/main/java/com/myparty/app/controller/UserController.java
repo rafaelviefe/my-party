@@ -49,7 +49,7 @@ public class UserController {
 	}
 
 	@GetMapping("/users")
-	@PreAuthorize("hasAuthority('SCOPE_ADMIN', 'SCOPE_ORGANIZER')")
+	@PreAuthorize("hasAnyAuthority('SCOPE_ADMIN', 'SCOPE_ORGANIZER')")
 	public ResponseEntity<List<User>> getUsers() {
 		return ResponseEntity.ok(userService.findAll());
 	}
