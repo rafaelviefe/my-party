@@ -29,21 +29,19 @@ public class UserController {
 
 	@Transactional
 	@PostMapping("/users")
-	public ResponseEntity<Void> newUser(@RequestBody @Valid CreateUserDto dto){
+	public ResponseEntity<Void> newUser(@RequestBody @Valid CreateUserDto dto) {
 
-		userService.findByUsername(dto.username())
-				.ifPresentOrElse(
-						user -> {throw new ResponseStatusException(HttpStatus.CONFLICT, "User already exists");},
-						() -> {
-							var newUser = new User();
-							newUser.setUsername(dto.username());
-							newUser.setPassword(passwordEncoder.encode(dto.password()));
-							newUser.setRole(User.Role.PARTICIPANT);
-							newUser.setPhoneNumber(dto.phoneNumber());
-							newUser.setStudent(dto.isStudent());
-							userService.save(newUser);
-						}
-				);
+		if (userService.findByUsername(dto.username()).isPresent()) {
+			return ResponseEntity.status(HttpStatus.CONFLICT).build();
+		}
+
+		var newUser = new User();
+		newUser.setUsername(dto.username());
+		newUser.setPassword(passwordEncoder.encode(dto.password()));
+		newUser.setRole(User.Role.PARTICIPANT);
+		newUser.setPhoneNumber(dto.phoneNumber());
+		newUser.setStudent(dto.isStudent());
+		userService.save(newUser);
 
 		return ResponseEntity.ok().build();
 	}
