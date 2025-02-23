@@ -1,5 +1,6 @@
 package com.myparty.app.controller;
 
+import java.time.Instant;
 import java.util.DoubleSummaryStatistics;
 import java.util.List;
 import java.util.UUID;
@@ -8,7 +9,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -28,10 +31,12 @@ public class EventController {
 
 	public final EventService eventService;
 	public final UserService userService;
+	public final TicketService ticketService;
 
-	public EventController(EventService eventService, UserService userService) {
+	public EventController(EventService eventService, UserService userService, TicketService ticketService) {
 		this.eventService = eventService;
 		this.userService = userService;
+		this.ticketService = ticketService;
 	}
 
 	@PostMapping("/events")
@@ -116,6 +121,25 @@ public class EventController {
 		return ResponseEntity.ok().build();
 	}
 
+	@PutMapping("/events/{eventId}/{organizerId}")
+	@PreAuthorize("hasAnyAuthority('SCOPE_ADMIN', 'SCOPE_ORGANIZER')")
+	public ResponseEntity<Void> updateEventOrganizer(@PathVariable Long eventId, @PathVariable UUID organizerId, JwtAuthenticationToken token) {
+
+		var event = eventService.findById(eventId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
+
+		if (!event.getOrganizer().getUserId().equals(UUID.fromString(token.getName()))) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the event organizer can update the organizer");
+		}
+
+		var organizer = userService.findById(organizerId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Organizer not found"));
+
+		event.setOrganizer(organizer);
+		eventService.save(event);
+
+		return ResponseEntity.ok().build();
+	}
 
 	@Transactional
 	@PutMapping("/events/{eventId}/rating")
