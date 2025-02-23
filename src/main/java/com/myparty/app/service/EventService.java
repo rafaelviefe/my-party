@@ -1,5 +1,6 @@
 package com.myparty.app.service;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import com.myparty.app.entities.Event;
@@ -18,4 +19,5 @@ public class EventService {
 
 	public Optional<Event> findByTitle(String title) {return eventRepository.findByTitle(title);}
 
+	public List<Event> findAll() {return eventRepository.findAll();}
 }
