@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.myparty.app.controller.dto.CreateUserDto;
+import com.myparty.app.controller.dto.UpdateUserDto;
 import com.myparty.app.entities.User;
 import com.myparty.app.service.UserService;
 import jakarta.transaction.Transactional;
@@ -56,6 +58,32 @@ public class UserController {
 		return ResponseEntity.ok(userService.findAll());
 	}
 
+	@GetMapping("/users/{userId}")
+	@PreAuthorize("hasAnyAuthority('SCOPE_ADMIN', 'SCOPE_ORGANIZER')")
+	public ResponseEntity<User> getUser(@PathVariable UUID userId) {
+		return ResponseEntity.ok(userService.findById(userId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")));
+	}
+
+	@PutMapping("/users/{userId}")
+	@PreAuthorize("hasAnyAuthority('SCOPE_ADMIN', 'SCOPE_ORGANIZER')")
+	public ResponseEntity<Void> updateUser(@PathVariable UUID userId, @RequestBody @Valid UpdateUserDto dto) {
+
+		var user = userService.findById(userId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+		if (userService.findByUsername(dto.username()).isPresent() && !dto.username().equals(user.getUsername())) {
+			return ResponseEntity.status(HttpStatus.CONFLICT).build();
+		}
+
+		user.setUsername(dto.username());
+		user.setPhoneNumber(dto.phoneNumber());
+		user.setStudent(dto.isStudent());
+		userService.save(user);
+
+		return ResponseEntity.ok().build();
+	}
+
 	@PutMapping("/users/{userId}/{role}")
 	@PreAuthorize("hasAnyAuthority('SCOPE_ADMIN', 'SCOPE_ORGANIZER')")
 	public ResponseEntity<Void> updateUserRole(@PathVariable UUID userId, @PathVariable String role, JwtAuthenticationToken token) {
@@ -74,6 +102,16 @@ public class UserController {
 		user.setRole(newRole);
 		userService.save(user);
 
+		return ResponseEntity.ok().build();
+	}
+
+	@DeleteMapping("/users/{userId}")
+	@PreAuthorize("hasAuthority('SCOPE_ADMIN')")
+	public ResponseEntity<Void> deleteUser(@PathVariable UUID userId) {
+		userService.findById(userId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+		userService.deleteById(userId);
 		return ResponseEntity.ok().build();
 	}
 

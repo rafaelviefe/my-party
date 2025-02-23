@@ -21,4 +21,6 @@ public class UserService {
 	public Optional<User> findById(UUID id) {return userRepository.findById(id);}
 
 	public List<User> findAll() {return userRepository.findAll();}
+
+	public void deleteById(UUID userId) {userRepository.deleteById(userId);}
 }
