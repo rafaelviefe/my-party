@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -194,4 +195,24 @@ public class EventController {
 
 		return ResponseEntity.ok().build();
 	}
+
+	@Transactional
+	@DeleteMapping("/events/{eventId}")
+	@PreAuthorize("hasAnyAuthority('SCOPE_ADMIN', 'SCOPE_ORGANIZER')")
+	public ResponseEntity<Void> deleteEvent(@PathVariable Long eventId, JwtAuthenticationToken token) {
+
+		var event = eventService.findById(eventId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
+
+		if (!event.getOrganizer().getUserId().equals(UUID.fromString(token.getName()))) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the event organizer can delete the event");
+		}
+
+		eventService.deleteById(eventId);
+
+		// TODO: notify the participant users that the event has been canceled
+
+		return ResponseEntity.ok().build();
+	}
+
 }
