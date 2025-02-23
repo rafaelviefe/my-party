@@ -1,9 +1,11 @@
 package com.myparty.app.controller;
 
+import java.util.DoubleSummaryStatistics;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -42,6 +44,14 @@ public class TicketController {
 		// TODO: program a service that will approve or reject the request in 5 minutes
 
 		return ResponseEntity.ok().build();
+	}
+
+	@GetMapping("/tickets/rating-statistics")
+	@PreAuthorize("hasAnyAuthority('SCOPE_ADMIN', 'SCOPE_ORGANIZER')")
+	public ResponseEntity<DoubleSummaryStatistics> getRatingStatistics() {
+		var tickets = ticketService.findAll();
+		var statistics = Ticket.calculateRatingStatistics(tickets);
+		return ResponseEntity.ok(statistics);
 	}
 
 }
