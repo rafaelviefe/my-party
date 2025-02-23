@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.myparty.app.controller.dto.CreateEventDto;
+import com.myparty.app.controller.dto.RequestEventDto;
 import com.myparty.app.controller.dto.EventResponseDto;
 import com.myparty.app.entities.Event;
 import com.myparty.app.service.EventService;
@@ -31,7 +32,7 @@ public class EventController {
 
 	@PostMapping("/events")
 	@PreAuthorize("hasAnyAuthority('SCOPE_ADMIN', 'SCOPE_ORGANIZER')")
-	public ResponseEntity<Void> newEvent(@RequestBody @Valid CreateEventDto dto, JwtAuthenticationToken token) {
+	public ResponseEntity<Void> newEvent(@RequestBody @Valid RequestEventDto dto, JwtAuthenticationToken token) {
 
 		var organizer = userService.findById(UUID.fromString(token.getName()))
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Organizer not found"));
@@ -76,6 +77,31 @@ public class EventController {
 				.toList();
 
 		return ResponseEntity.ok(events);
+	}
+
+
+	@PutMapping("/events/{eventId}")
+	@PreAuthorize("hasAnyAuthority('SCOPE_ADMIN', 'SCOPE_ORGANIZER')")
+	public ResponseEntity<Void> updateEvent(@PathVariable Long eventId, @RequestBody @Valid RequestEventDto dto) {
+
+		var event = eventService.findById(eventId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
+
+		if (!event.getTitle().equals(dto.title())) {
+			if (eventService.existsByTitleAndIdNot(dto.title(), eventId)) {
+				throw new ResponseStatusException(HttpStatus.CONFLICT, "Event title already exists");
+			}
+			event.setTitle(dto.title());
+		}
+
+		event.setDescription(dto.description());
+		event.setLocation(dto.location());
+		event.setDate(dto.date());
+		event.setPrice(dto.price());
+		event.setCategory(dto.category());
+		eventService.save(event);
+
+		return ResponseEntity.ok().build();
 	}
 
 }
