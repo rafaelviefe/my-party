@@ -1,6 +1,11 @@
 package com.myparty.app.entities;
 
 import java.time.Instant;
+import java.util.DoubleSummaryStatistics;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -8,6 +13,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -40,6 +46,9 @@ public class Event {
 
 	private Long reviews;
 
+	@OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
+	private List<Ticket> tickets;
+
 	public Event() {
 	}
 
@@ -56,12 +65,11 @@ public class Event {
 		this.reviews = reviews;
 	}
 
-	public Long getReviews() {
-		return reviews;
-	}
-
-	public void setReviews(Long reviews) {
-		this.reviews = reviews;
+	public static DoubleSummaryStatistics calculateRatingStatistics(List<Event> events) {
+		return events.stream()
+				.map(Event::getRating)
+				.filter(Objects::nonNull)
+				.collect(Collectors.summarizingDouble(Double::doubleValue));
 	}
 
 	public Long getEventId() {

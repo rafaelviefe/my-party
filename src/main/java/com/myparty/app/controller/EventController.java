@@ -1,5 +1,6 @@
 package com.myparty.app.controller;
 
+import java.util.DoubleSummaryStatistics;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
-import com.myparty.app.controller.dto.CreateEventDto;
+import com.myparty.app.controller.dto.RatingEventDto;
 import com.myparty.app.controller.dto.RequestEventDto;
 import com.myparty.app.controller.dto.EventResponseDto;
 import com.myparty.app.entities.Event;
@@ -79,6 +80,14 @@ public class EventController {
 		return ResponseEntity.ok(events);
 	}
 
+
+	@GetMapping("/events/rating-statistics")
+	@PreAuthorize("hasAnyAuthority('SCOPE_ADMIN', 'SCOPE_ORGANIZER')")
+	public ResponseEntity<DoubleSummaryStatistics> getEventRatingStatistics() {
+		List<Event> events = eventService.findAll();
+		var statistics = Event.calculateRatingStatistics(events);
+		return ResponseEntity.ok(statistics);
+	}
 
 	@PutMapping("/events/{eventId}")
 	@PreAuthorize("hasAnyAuthority('SCOPE_ADMIN', 'SCOPE_ORGANIZER')")
