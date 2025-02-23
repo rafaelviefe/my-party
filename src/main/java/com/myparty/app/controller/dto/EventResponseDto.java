@@ -10,7 +10,7 @@ public record EventResponseDto(
 		Instant date,
 		Double price,
 		String category,
-		Float rating,
+		Double rating,
 		Long reviews,
 		String organizerName
 ) {}
