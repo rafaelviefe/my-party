@@ -88,6 +88,24 @@ public class EventController {
 		return ResponseEntity.ok(events);
 	}
 
+	@GetMapping("/events/{eventId}")
+	public ResponseEntity<EventResponseDto> getEvent(@PathVariable Long eventId) {
+		var event = eventService.findById(eventId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
+
+		return ResponseEntity.ok(new EventResponseDto(
+				event.getEventId(),
+				event.getTitle(),
+				event.getDescription(),
+				event.getLocation(),
+				event.getDate(),
+				event.getPrice(),
+				event.getCategory(),
+				event.getRating(),
+				event.getReviews(),
+				event.getOrganizer().getUsername()
+		));
+	}
 
 	@GetMapping("/events/rating-statistics")
 	@PreAuthorize("hasAnyAuthority('SCOPE_ADMIN', 'SCOPE_ORGANIZER')")

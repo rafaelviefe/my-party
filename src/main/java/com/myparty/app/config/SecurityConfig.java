@@ -42,6 +42,7 @@ public class SecurityConfig {
 					.requestMatchers(HttpMethod.POST, "/login").permitAll()
 					.requestMatchers(HttpMethod.POST, "/users").permitAll()
 					.requestMatchers(HttpMethod.GET, "/events").permitAll()
+					.requestMatchers(HttpMethod.GET, "/events/{eventId}").permitAll()
 					.anyRequest().authenticated()
 			)
 			.csrf(AbstractHttpConfigurer::disable)
