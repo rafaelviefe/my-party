@@ -16,8 +16,11 @@ import com.myparty.app.controller.dto.RatingEventDto;
 import com.myparty.app.controller.dto.RequestEventDto;
 import com.myparty.app.controller.dto.EventResponseDto;
 import com.myparty.app.entities.Event;
+import com.myparty.app.entities.Ticket;
 import com.myparty.app.service.EventService;
+import com.myparty.app.service.TicketService;
 import com.myparty.app.service.UserService;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 
 @RestController
@@ -113,4 +116,40 @@ public class EventController {
 		return ResponseEntity.ok().build();
 	}
 
+
+	@Transactional
+	@PutMapping("/events/{eventId}/rating")
+	public ResponseEntity<Void> rateEvent(@PathVariable Long eventId, @RequestBody @Valid RatingEventDto dto, JwtAuthenticationToken token) {
+
+		var rating  = dto.rating();
+		if (rating < 0 || rating > 5 || (rating * 10) % 5 != 0) {
+			throw new ResponseStatusException(HttpStatus.PRECONDITION_FAILED , "Rating must be between 0 and 5 and multiple of 0.5");
+		}
+
+		var user = userService.findById(UUID.fromString(token.getName()))
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+		var event = eventService.findById(eventId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
+
+		if (event.getDate().isAfter(Instant.now())) {
+			throw new ResponseStatusException(HttpStatus.PRECONDITION_FAILED, "Event has not happened yet");
+		}
+
+		var ticket = ticketService.findByUserAndEventAndStatus(user, event, Ticket.Status.APPROVED)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User does not have a valid ticket for this event"));
+
+		var eventRating = event.getRating() != null ? event.getRating() : 0;
+		if (ticket.getRating() != null) {
+			event.setRating((eventRating * event.getReviews() - ticket.getRating() + rating) / event.getReviews());
+		} else {
+			event.setRating((eventRating * event.getReviews() + rating) / (event.getReviews() + 1));
+			event.setReviews(event.getReviews() + 1);
+		}
+
+		ticket.setRating(rating);
+		ticketService.save(ticket);
+
+		return ResponseEntity.ok().build();
+	}
 }
