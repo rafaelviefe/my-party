@@ -20,4 +20,8 @@ public class EventService {
 	public Optional<Event> findByTitle(String title) {return eventRepository.findByTitle(title);}
 
 	public List<Event> findAll() {return eventRepository.findAll();}
+
+	public void deleteById(Long eventId) {eventRepository.deleteById(eventId);}
+
+	public boolean existsByTitleAndIdNot(String title, Long eventId) {return eventRepository.existsByTitleAndEventIdNot(title, eventId);}
 }
