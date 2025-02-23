@@ -36,14 +36,14 @@ public class Event {
 
 	private String category;
 
-	private Float rating;
+	private Double rating;
 
 	private Long reviews;
 
 	public Event() {
 	}
 
-	public Event(Long eventId, User organizer, String title, String description, String location, Instant date, Double price, String category, Float rating, Long reviews) {
+	public Event(Long eventId, User organizer, String title, String description, String location, Instant date, Double price, String category, Double rating, Long reviews) {
 		this.eventId = eventId;
 		this.organizer = organizer;
 		this.title = title;
@@ -128,11 +128,19 @@ public class Event {
 		this.category = category;
 	}
 
-	public Float getRating() {
+	public Double getRating() {
 		return rating;
 	}
 
-	public void setRating(Float rating) {
+	public void setRating(Double rating) {
 		this.rating = rating;
 	}
+
+	public Long getReviews() { return reviews; }
+
+	public void setReviews(Long reviews) { this.reviews = reviews; }
+
+	public List<Ticket> getTickets() { return tickets; }
+
+	public void setTickets(List<Ticket> tickets) { this.tickets = tickets; }
 }
