@@ -45,6 +45,7 @@ public class EventController {
 							newEvent.setDate(dto.date());
 							newEvent.setPrice(dto.price());
 							newEvent.setCategory(dto.category());
+							newEvent.setReviews(0L);
 							eventService.save(newEvent);
 						}
 				);

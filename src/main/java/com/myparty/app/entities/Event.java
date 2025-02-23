@@ -38,10 +38,12 @@ public class Event {
 
 	private Float rating;
 
+	private Long reviews;
+
 	public Event() {
 	}
 
-	public Event(Long eventId, User organizer, String title, String description, String location, Instant date, Double price, String category, Float rating) {
+	public Event(Long eventId, User organizer, String title, String description, String location, Instant date, Double price, String category, Float rating, Long reviews) {
 		this.eventId = eventId;
 		this.organizer = organizer;
 		this.title = title;
@@ -51,6 +53,15 @@ public class Event {
 		this.price = price;
 		this.category = category;
 		this.rating = rating;
+		this.reviews = reviews;
+	}
+
+	public Long getReviews() {
+		return reviews;
+	}
+
+	public void setReviews(Long reviews) {
+		this.reviews = reviews;
 	}
 
 	public Long getEventId() {
