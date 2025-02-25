@@ -1,5 +1,6 @@
 package com.myparty.app.controller;
 
+import java.time.Instant;
 import java.util.DoubleSummaryStatistics;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
@@ -39,6 +40,10 @@ public class TicketController {
 
 		var event = eventService.findByTitle(dto.eventTitle())
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
+
+		if (event.getDate().isBefore(Instant.now())) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Event has already happened");
+		}
 
 		ticketService.createTicket(user, event);
 
