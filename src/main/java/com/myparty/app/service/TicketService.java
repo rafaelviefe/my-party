@@ -39,4 +39,13 @@ public class TicketService {
 	public Optional<Ticket> findByUserAndEventAndStatus(User user, Event event, Ticket.Status status) {
 		return ticketRepository.findByUserAndEventAndStatus(user, event, status);
 	}
+
+	public Optional<Ticket> findById(Long ticketId) {
+		return ticketRepository.findById(ticketId);
+	}
+
+	public void updateTicketStatus(Ticket ticket, Ticket.Status status) {
+		ticket.setStatus(status);
+		ticketRepository.save(ticket);
+	}
 }
