@@ -23,4 +23,8 @@ public class UserService {
 	public List<User> findAll() {return userRepository.findAll();}
 
 	public void deleteById(UUID userId) {userRepository.deleteById(userId);}
+
+	public boolean existsByUsernameAndIdNot(String username, UUID userId) {
+		return userRepository.existsByUsernameAndUserIdNot(username, userId);
+	}
 }

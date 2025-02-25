@@ -67,13 +67,13 @@ public class UserController {
 
 	@PutMapping("/users/{userId}")
 	@PreAuthorize("hasAnyAuthority('SCOPE_ADMIN', 'SCOPE_ORGANIZER')")
-	public ResponseEntity<Void> updateUser(@PathVariable UUID userId, @RequestBody @Valid UpdateUserDto dto) {
+	public ResponseEntity<Void> updateOtherUser(@PathVariable UUID userId, @RequestBody @Valid UpdateUserDto dto) {
 
 		var user = userService.findById(userId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-		if (userService.findByUsername(dto.username()).isPresent() && !dto.username().equals(user.getUsername())) {
-			return ResponseEntity.status(HttpStatus.CONFLICT).build();
+		if (!user.getUsername().equals(dto.username()) && userService.existsByUsernameAndIdNot(dto.username(), userId)) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already exists");
 		}
 
 		user.setUsername(dto.username());

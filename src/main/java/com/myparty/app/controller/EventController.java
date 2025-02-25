@@ -123,13 +123,11 @@ public class EventController {
 		var event = eventService.findById(eventId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
 
-		if (!event.getTitle().equals(dto.title())) {
-			if (eventService.existsByTitleAndIdNot(dto.title(), eventId)) {
-				throw new ResponseStatusException(HttpStatus.CONFLICT, "Event title already exists");
-			}
-			event.setTitle(dto.title());
+		if (!event.getTitle().equals(dto.title()) && eventService.existsByTitleAndIdNot(dto.title(), eventId)) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT, "Event title already exists");
 		}
 
+		event.setTitle(dto.title());
 		event.setDescription(dto.description());
 		event.setLocation(dto.location());
 		event.setDate(dto.date());
