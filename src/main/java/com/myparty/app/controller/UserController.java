@@ -65,22 +65,17 @@ public class UserController {
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")));
 	}
 
+	@PutMapping("/users")
+	public ResponseEntity<Void> updateUser(@RequestBody @Valid UpdateUserDto dto, JwtAuthenticationToken token) {
+		var userId = UUID.fromString(token.getName());
+		userService.updateUser(userId, dto);
+		return ResponseEntity.ok().build();
+	}
+
 	@PutMapping("/users/{userId}")
 	@PreAuthorize("hasAnyAuthority('SCOPE_ADMIN', 'SCOPE_ORGANIZER')")
 	public ResponseEntity<Void> updateOtherUser(@PathVariable UUID userId, @RequestBody @Valid UpdateUserDto dto) {
-
-		var user = userService.findById(userId)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-
-		if (!user.getUsername().equals(dto.username()) && userService.existsByUsernameAndIdNot(dto.username(), userId)) {
-			throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already exists");
-		}
-
-		user.setUsername(dto.username());
-		user.setPhoneNumber(dto.phoneNumber());
-		user.setStudent(dto.isStudent());
-		userService.save(user);
-
+		userService.updateUser(userId, dto);
 		return ResponseEntity.ok().build();
 	}
 
