@@ -1,5 +1,7 @@
 package com.myparty.app.service;
 
+import java.util.List;
+import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -15,6 +17,10 @@ public class TicketService {
 
 	public TicketService(TicketRepository ticketRepository) {this.ticketRepository = ticketRepository;}
 
+	public void save(Ticket ticket) {ticketRepository.save(ticket);}
+
+	public List<Ticket> findAll() {return ticketRepository.findAll();}
+
 	public void createTicket(User user, Event event) {
 
 		if (ticketRepository.existsByUserAndEventAndStatusNot(user, event, Ticket.Status.REJECTED)) {
@@ -25,8 +31,21 @@ public class TicketService {
 		newTicket.setUser(user);
 		newTicket.setEvent(event);
 		newTicket.setStatus(Ticket.Status.PENDING);
+		newTicket.setRating(null);
 
 		ticketRepository.save(newTicket);
 	}
 
+	public Optional<Ticket> findByUserAndEventAndStatus(User user, Event event, Ticket.Status status) {
+		return ticketRepository.findByUserAndEventAndStatus(user, event, status);
+	}
+
+	public Optional<Ticket> findById(Long ticketId) {
+		return ticketRepository.findById(ticketId);
+	}
+
+	public void updateTicketStatus(Ticket ticket, Ticket.Status status) {
+		ticket.setStatus(status);
+		ticketRepository.save(ticket);
+	}
 }

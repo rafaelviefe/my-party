@@ -4,7 +4,7 @@ import java.time.Instant;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-public record CreateEventDto(
+public record RequestEventDto(
 		@NotBlank String title,
 		@NotBlank String description,
 		@NotBlank String location,

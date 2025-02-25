@@ -1,5 +1,9 @@
 package com.myparty.app.entities;
 
+import java.util.DoubleSummaryStatistics;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import jakarta.persistence.*;
 
 @Entity
@@ -22,14 +26,24 @@ public class Ticket {
 	@Enumerated(EnumType.STRING)
 	private Status status;
 
+	private Double rating;
+
 	public Ticket() {
 	}
 
-	public Ticket(Long ticketId, User user, Event event, Status status) {
+	public Ticket(Long ticketId, User user, Event event, Status status, Double rating) {
 		this.ticketId = ticketId;
 		this.user = user;
 		this.event = event;
 		this.status = status;
+		this.rating = rating;
+	}
+
+	public static DoubleSummaryStatistics calculateRatingStatistics(List<Ticket> tickets) {
+		return tickets.stream()
+				.map(Ticket::getRating)
+				.filter(Objects::nonNull)
+				.collect(Collectors.summarizingDouble(Double::doubleValue));
 	}
 
 	public Long getTicketId() {
@@ -63,6 +77,10 @@ public class Ticket {
 	public void setStatus(Status status) {
 		this.status = status;
 	}
+
+	public Double getRating() { return rating; }
+
+	public void setRating(Double rating) { this.rating = rating; }
 
 	public enum Status {
 		PENDING("Pending"),

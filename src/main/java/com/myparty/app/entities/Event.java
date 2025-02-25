@@ -1,6 +1,11 @@
 package com.myparty.app.entities;
 
 import java.time.Instant;
+import java.util.DoubleSummaryStatistics;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -8,6 +13,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -36,12 +42,17 @@ public class Event {
 
 	private String category;
 
-	private Float rating;
+	private Double rating;
+
+	private Long reviews;
+
+	@OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
+	private List<Ticket> tickets;
 
 	public Event() {
 	}
 
-	public Event(Long eventId, User organizer, String title, String description, String location, Instant date, Double price, String category, Float rating) {
+	public Event(Long eventId, User organizer, String title, String description, String location, Instant date, Double price, String category, Double rating, Long reviews) {
 		this.eventId = eventId;
 		this.organizer = organizer;
 		this.title = title;
@@ -51,6 +62,14 @@ public class Event {
 		this.price = price;
 		this.category = category;
 		this.rating = rating;
+		this.reviews = reviews;
+	}
+
+	public static DoubleSummaryStatistics calculateRatingStatistics(List<Event> events) {
+		return events.stream()
+				.map(Event::getRating)
+				.filter(Objects::nonNull)
+				.collect(Collectors.summarizingDouble(Double::doubleValue));
 	}
 
 	public Long getEventId() {
@@ -117,11 +136,19 @@ public class Event {
 		this.category = category;
 	}
 
-	public Float getRating() {
+	public Double getRating() {
 		return rating;
 	}
 
-	public void setRating(Float rating) {
+	public void setRating(Double rating) {
 		this.rating = rating;
 	}
+
+	public Long getReviews() { return reviews; }
+
+	public void setReviews(Long reviews) { this.reviews = reviews; }
+
+	public List<Ticket> getTickets() { return tickets; }
+
+	public void setTickets(List<Ticket> tickets) { this.tickets = tickets; }
 }
