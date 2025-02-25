@@ -12,5 +12,6 @@ public record EventResponseDto(
 		String category,
 		Double rating,
 		Long reviews,
-		String organizerName
+		String organizerName,
+		Long ticketsSold
 ) {}

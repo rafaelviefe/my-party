@@ -70,23 +70,12 @@ public class EventController {
 	}
 
 	@GetMapping("/events")
-	public ResponseEntity<List<EventResponseDto>> getEvents() {
-		List<EventResponseDto> events = eventService.findAll().stream()
-				.map(event -> new EventResponseDto(
-						event.getEventId(),
-						event.getTitle(),
-						event.getDescription(),
-						event.getLocation(),
-						event.getDate(),
-						event.getPrice(),
-						event.getCategory(),
-						event.getRating(),
-						event.getReviews(),
-						event.getOrganizer().getUsername()
-				))
+	public ResponseEntity<List<EventResponseDto>> getAllEvents() {
+		List<Event> events = eventService.findAll();
+		List<EventResponseDto> eventDtos = events.stream()
+				.map(eventService::getEventResponse)
 				.toList();
-
-		return ResponseEntity.ok(events);
+		return ResponseEntity.ok(eventDtos);
 	}
 
 	@GetMapping("/events/{eventId}")
@@ -94,18 +83,7 @@ public class EventController {
 		var event = eventService.findById(eventId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
 
-		return ResponseEntity.ok(new EventResponseDto(
-				event.getEventId(),
-				event.getTitle(),
-				event.getDescription(),
-				event.getLocation(),
-				event.getDate(),
-				event.getPrice(),
-				event.getCategory(),
-				event.getRating(),
-				event.getReviews(),
-				event.getOrganizer().getUsername()
-		));
+		return ResponseEntity.ok(eventService.getEventResponse(event));
 	}
 
 	@GetMapping("/events/rating-statistics")
