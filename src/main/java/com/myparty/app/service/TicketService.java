@@ -21,7 +21,7 @@ public class TicketService {
 
 	public List<Ticket> findAll() {return ticketRepository.findAll();}
 
-	public void createTicket(User user, Event event) {
+	public Ticket createTicket(User user, Event event) {
 
 		if (ticketRepository.existsByUserAndEventAndStatusNot(user, event, Ticket.Status.REJECTED)) {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "The User already have a ticket for this event.");
@@ -33,7 +33,7 @@ public class TicketService {
 		newTicket.setStatus(Ticket.Status.PENDING);
 		newTicket.setRating(null);
 
-		ticketRepository.save(newTicket);
+		return ticketRepository.save(newTicket);
 	}
 
 	public Optional<Ticket> findByUserAndEventAndStatus(User user, Event event, Ticket.Status status) {

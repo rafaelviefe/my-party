@@ -19,6 +19,7 @@ import com.myparty.app.controller.dto.CreateTicketDto;
 import com.myparty.app.controller.dto.TicketResponseDto;
 import com.myparty.app.entities.Ticket;
 import com.myparty.app.service.EventService;
+import com.myparty.app.service.PaymentProcessorService;
 import com.myparty.app.service.TicketService;
 import com.myparty.app.service.UserService;
 import jakarta.validation.Valid;
@@ -29,11 +30,17 @@ public class TicketController {
 	private final TicketService ticketService;
 	private final UserService userService;
 	private final EventService eventService;
+	private final PaymentProcessorService paymentProcessorService;
 
-	public TicketController(TicketService ticketService, UserService userService, EventService eventService) {
+	public TicketController(
+			TicketService ticketService,
+			UserService userService,
+			EventService eventService,
+			PaymentProcessorService paymentProcessorService) {
 		this.ticketService = ticketService;
 		this.userService = userService;
 		this.eventService = eventService;
+		this.paymentProcessorService = paymentProcessorService;
 	}
 
 	@PostMapping("/tickets")
@@ -49,9 +56,9 @@ public class TicketController {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Event has already happened");
 		}
 
-		ticketService.createTicket(user, event);
+		var ticket = ticketService.createTicket(user, event);
 
-		// TODO: program a service that will approve or reject the request in 5 minutes
+		paymentProcessorService.processPayment(ticket);
 
 		return ResponseEntity.ok().build();
 	}
