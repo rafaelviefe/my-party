@@ -20,7 +20,7 @@ public class TokenController {
 
 	private final JwtEncoder jwtEncoder;
 	private final UserService userService;
-	private BCryptPasswordEncoder passwordEncoder;
+	private final BCryptPasswordEncoder passwordEncoder;
 
 	public TokenController(BCryptPasswordEncoder passwordEncoder, UserService userService, JwtEncoder jwtEncoder) {
 		this.passwordEncoder = passwordEncoder;
@@ -33,7 +33,7 @@ public class TokenController {
 
 		var user = userService.findByUsername(loginRequestDto.username());
 
-		if (user.isEmpty() || !user.get().isLoginCorrect(loginRequestDto, passwordEncoder)) {
+		if (user.isEmpty() || user.get().passwordMatches(loginRequestDto.password(), passwordEncoder)) {
 			throw new BadCredentialsException("username or password is invalid!");
 		}
 
