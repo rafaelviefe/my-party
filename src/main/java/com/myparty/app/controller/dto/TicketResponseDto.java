@@ -5,6 +5,7 @@ import com.myparty.app.entities.Ticket;
 
 public record TicketResponseDto(
 		Long ticketId,
+		String username,
 		String eventTitle,
 		Instant eventDate,
 		String status,
@@ -13,6 +14,7 @@ public record TicketResponseDto(
 	public static TicketResponseDto fromEntity(Ticket ticket) {
 		return new TicketResponseDto(
 				ticket.getTicketId(),
+				ticket.getUser().getUsername(),
 				ticket.getEvent().getTitle(),
 				ticket.getEvent().getDate(),
 				ticket.getStatus().name(),
