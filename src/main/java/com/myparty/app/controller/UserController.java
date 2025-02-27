@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.myparty.app.controller.dto.CreateUserDto;
+import com.myparty.app.controller.dto.UpdatePasswordDto;
 import com.myparty.app.controller.dto.UpdateUserDto;
 import com.myparty.app.entities.User;
 import com.myparty.app.service.UserService;
@@ -78,6 +79,21 @@ public class UserController {
 	public ResponseEntity<Void> updateOtherUser(@PathVariable UUID userId, @RequestBody @Valid UpdateUserDto dto) {
 		userService.updateUser(userId, dto);
 		return ResponseEntity.ok().build();
+	}
+
+	@PatchMapping("/users")
+	public ResponseEntity<Void> updatePassword(@RequestBody @Valid UpdatePasswordDto dto, JwtAuthenticationToken token) {
+		var user = userService.findById(UUID.fromString(token.getName()))
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+		if (user.passwordMatches(dto.oldPassword(), passwordEncoder)) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The old password is incorrect");
+		}
+
+		user.setPassword(passwordEncoder.encode(dto.newPassword()));
+		userService.save(user);
+
+		return ResponseEntity.noContent().build();
 	}
 
 	@PatchMapping("/users/{userId}/{role}")
