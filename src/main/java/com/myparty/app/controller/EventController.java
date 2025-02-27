@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import com.myparty.app.controller.dto.EventRevenueDto;
 import com.myparty.app.controller.dto.RatingEventDto;
 import com.myparty.app.controller.dto.RequestEventDto;
 import com.myparty.app.controller.dto.EventResponseDto;
@@ -85,6 +86,17 @@ public class EventController {
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
 
 		return ResponseEntity.ok(eventService.getEventResponse(event));
+	}
+
+	@GetMapping("/events/{eventId}/revenue")
+	@PreAuthorize("hasAnyAuthority('SCOPE_ADMIN', 'SCOPE_ORGANIZER')")
+	public ResponseEntity<EventRevenueDto> getEventRevenue(@PathVariable Long eventId) {
+		var event = eventService.findById(eventId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
+
+		var revenue = ticketService.calculateRevenueByEvent(eventId);
+
+		return ResponseEntity.ok(new EventRevenueDto(eventId, revenue != null ? revenue : 0.0));
 	}
 
 	@GetMapping("/events/rating-statistics")

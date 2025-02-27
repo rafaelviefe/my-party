@@ -48,4 +48,8 @@ public class TicketService {
 		ticket.setStatus(status);
 		ticketRepository.save(ticket);
 	}
+
+	public Double calculateRevenueByEvent(Long eventId) {
+		return ticketRepository.calculateRevenueByEvent(eventId);
+	}
 }
