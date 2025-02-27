@@ -49,7 +49,7 @@ public class TicketService {
 		ticketRepository.save(ticket);
 	}
 
-	public Double calculateRevenueByEvent(Long eventId) {
-		return ticketRepository.calculateRevenueByEvent(eventId);
-	}
+	public Double calculateRevenueByEvent(Long eventId) {return ticketRepository.calculateRevenueByEvent(eventId);}
+
+	public List<Ticket> findByUser(User user) {return ticketRepository.findByUser(user);}
 }

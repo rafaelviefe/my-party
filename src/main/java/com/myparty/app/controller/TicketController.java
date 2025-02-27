@@ -73,6 +73,17 @@ public class TicketController {
 		return ResponseEntity.ok(ticketDtos);
 	}
 
+	@GetMapping("/tickets/me")
+	public ResponseEntity<List<TicketResponseDto>> getMyTickets(JwtAuthenticationToken token) {
+		var user = userService.findById(UUID.fromString(token.getName()))
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+		List<Ticket> tickets = ticketService.findByUser(user);
+		List<TicketResponseDto> ticketDtos = tickets.stream().map(TicketResponseDto::fromEntity).toList();
+
+		return ResponseEntity.ok(ticketDtos);
+	}
+
 	@GetMapping("/tickets/rating-statistics")
 	@PreAuthorize("hasAnyAuthority('SCOPE_ADMIN', 'SCOPE_ORGANIZER')")
 	public ResponseEntity<DoubleSummaryStatistics> getRatingStatistics() {

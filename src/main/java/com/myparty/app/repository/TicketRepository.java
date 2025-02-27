@@ -1,5 +1,6 @@
 package com.myparty.app.repository;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,6 +17,8 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
 	Optional<Ticket> findByUserAndEventAndStatus(User user, Event event, Ticket.Status status);
 
+	List<Ticket> findByUser(User user);
+
 	@Query(value = """
     SELECT COALESCE(SUM(
         CASE\s
@@ -29,5 +32,4 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     WHERE t.status = 'APPROVED' AND te.event_id = :eventId
    \s""", nativeQuery = true)
 	Double calculateRevenueByEvent(@Param("eventId") Long eventId);
-
 }
