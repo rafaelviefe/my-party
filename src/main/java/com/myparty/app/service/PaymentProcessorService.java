@@ -26,9 +26,9 @@ public class PaymentProcessorService {
 	}
 
 	@Async
-	public void processPayment(Ticket ticket) {
+	public void processPayment(Ticket ticket, Ticket.Status status) {
 		scheduler.schedule(() -> {
-			if (ticket.getStatus() != Ticket.Status.PENDING) {
+			if (ticket.getStatus() != status) {
 				return;
 			}
 

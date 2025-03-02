@@ -58,7 +58,7 @@ public class TicketController {
 
 		var ticket = ticketService.createTicket(user, event);
 
-		paymentProcessorService.processPayment(ticket);
+		paymentProcessorService.processPayment(ticket, Ticket.Status.PENDING);
 
 		return ResponseEntity.ok().build();
 	}
@@ -90,6 +90,27 @@ public class TicketController {
 		var tickets = ticketService.findAll();
 		var statistics = Ticket.calculateRatingStatistics(tickets);
 		return ResponseEntity.ok(statistics);
+	}
+
+	@PatchMapping("/tickets/{ticketId}/retry")
+	public ResponseEntity<Void> retryPayment(@PathVariable Long ticketId, JwtAuthenticationToken token) {
+		var user = userService.findById(UUID.fromString(token.getName()))
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+		var ticket = ticketService.findById(ticketId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket not found"));
+
+		if (!ticket.getUser().equals(user)) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to retry this ticket");
+		}
+
+		if (ticket.getStatus() != Ticket.Status.REJECTED) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ticket is not rejected");
+		}
+
+		paymentProcessorService.processPayment(ticket, Ticket.Status.REJECTED);
+
+		return ResponseEntity.ok().build();
 	}
 
 	@PatchMapping("/tickets/{ticketId}")
