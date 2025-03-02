@@ -1,8 +1,12 @@
 package com.myparty.app.service;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import com.myparty.app.controller.dto.EventResponseDto;
 import com.myparty.app.entities.Event;
@@ -76,4 +80,34 @@ public class EventService {
 				ticketCount
 		);
 	}
+
+	@Scheduled(cron = "0 0 8 * * *")
+	public void checkAndSendEventNotifications() {
+
+		LocalDate targetDate = LocalDate.now().plusDays(3);
+		ZoneId zoneId = ZoneId.systemDefault();
+
+		Instant startOfDay = targetDate.atStartOfDay(zoneId).toInstant();
+		Instant endOfDay = targetDate.atTime(LocalTime.MAX).atZone(zoneId).toInstant();
+
+		List<Event> events = eventRepository.findByDateBetween(startOfDay, endOfDay);
+
+		for (Event event : events) {
+			List<User> users = ticketService.getTicketsByEvent(event)
+					.stream().map(Ticket::getUser).toList();
+
+			for (User user : users) {
+				String message = user.getUsername() + ", the event '" + event.getTitle() + "' will occur in 3 days.";
+
+				notificationPublisher.publishNotification(
+						user.getPhoneNumber(),
+						message,
+						Instant.now(),
+						Notification.NotificationType.EVENT_REMINDER
+				);
+			}
+		}
+	}
+
+
 }
