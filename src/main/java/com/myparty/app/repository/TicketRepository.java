@@ -32,4 +32,6 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     WHERE t.status = 'APPROVED' AND te.event_id = :eventId
    \s""", nativeQuery = true)
 	Double calculateRevenueByEvent(@Param("eventId") Long eventId);
+
+	List<Ticket> findByEventAndStatus(Event event, Ticket.Status status);
 }

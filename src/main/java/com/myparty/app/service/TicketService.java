@@ -52,4 +52,8 @@ public class TicketService {
 	public Double calculateRevenueByEvent(Long eventId) {return ticketRepository.calculateRevenueByEvent(eventId);}
 
 	public List<Ticket> findByUser(User user) {return ticketRepository.findByUser(user);}
+
+	public List<Ticket> getTicketsByEvent(Event event) {
+		return ticketRepository.findByEventAndStatus(event, Ticket.Status.APPROVED);
+	}
 }

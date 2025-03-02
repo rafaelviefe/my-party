@@ -197,9 +197,7 @@ public class EventController {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the event organizer can delete the event");
 		}
 
-		eventService.deleteById(eventId);
-
-		// TODO: notify the participant users that the event has been canceled
+		eventService.deleteById(event);
 
 		return ResponseEntity.ok().build();
 	}
