@@ -1,10 +1,8 @@
 package com.myparty.app.messaging;
 
-import java.time.Instant;
-import java.util.Map;
-import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
+import com.myparty.app.controller.dto.NotificationDto;
 import com.myparty.app.entities.Notification;
 import com.myparty.app.repository.NotificationRepository;
 
@@ -18,13 +16,13 @@ public class NotificationConsumer {
 		this.notificationRepository = notificationRepository;
 	}
 
-	@RabbitHandler
-	public void receiveMessage(Map<String, Object> message) {
+	@RabbitListener(queues = "${rabbitmq.queue}")
+	public void receiveNotification(NotificationDto notificationDTO) {
 		Notification notification = new Notification();
-		notification.setPhoneNumber(message.get("phoneNumber").toString());
-		notification.setMessage(message.get("message").toString());
-		notification.setSendAt(Instant.parse(message.get("sendAt").toString()));
-		notification.setType(Notification.NotificationType.valueOf(message.get("type").toString()));
+		notification.setPhoneNumber(notificationDTO.phoneNumber());
+		notification.setMessage(notificationDTO.message());
+		notification.setSendAt(notificationDTO.sendAt());
+		notification.setType(notificationDTO.type());
 
 		notificationRepository.save(notification);
 	}
