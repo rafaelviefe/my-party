@@ -5,7 +5,8 @@ DELETE FROM tb_users;
 INSERT INTO tb_users (user_id, is_student, password, phone_number, `role`, username) VALUES
 ('5f74ce15-982a-4326-8365-80e800d772f9', 1, '$2a$10$L5s.aQSiKDGOaI2mPml/2ewK5DCbm97RG1fo.ZdgQvnaTD2UHsdze', '+5548998426134', 'ORGANIZER', 'rafael'),
 ('5f74ce15-982a-4326-8365-80e800d772f8', 0, '$2a$10$49FJC4.Q2kCGqkFegtd.WOJzxQexvY/O672QTUlwyfMCLJRmKM8qu', '+5548998426134', 'PARTICIPANT', 'rafolas'),
-('5f74ce15-982a-4326-8365-80e800d772f7', 1, '$2a$10$JYxloUxpU5R26AUaKm0YDO8MfRgyqDDXqAA/KBOK2wJsUis91aMPa', '+5548998426134', 'ADMIN', 'admin');
+('5f74ce15-982a-4326-8365-80e800d772f7', 1, '$2a$10$JYxloUxpU5R26AUaKm0YDO8MfRgyqDDXqAA/KBOK2wJsUis91aMPa', '+5548998426134', 'ADMIN', 'admin'),
+('5f74ce15-982a-4326-8365-80e800d772f6', 0, '$2a$10$49FJC4.Q2kCGqkFegtd.WOJzxQexvY/O672QTUlwyfMCLJRmKM8qu', '+5548998426134', 'PARTICIPANT', 'farolas');
 
 
 INSERT INTO tb_events (event_id, category, `date`, description, location, price, rating, reviews, title, organizer_id) VALUES
