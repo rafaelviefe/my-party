@@ -77,7 +77,7 @@ public class UserControllerTest {
 			.uri("/users")
 			.bodyValue(dto)
 			.exchange()
-			.expectStatus().is4xxClientError();
+			.expectStatus().isUnauthorized();
 	}
 
 	@Sql("/insert.sql")
@@ -163,7 +163,7 @@ public class UserControllerTest {
 				.header("Authorization", "Bearer " + token)
 				.bodyValue(dto)
 				.exchange()
-				.expectStatus().is4xxClientError();
+				.expectStatus().isBadRequest();
 	}
 
 	@Sql("/insert.sql")
@@ -217,7 +217,7 @@ public class UserControllerTest {
 				.header("Authorization", "Bearer " + token)
 				.bodyValue(dto)
 				.exchange()
-				.expectStatus().is4xxClientError();
+				.expectStatus().isBadRequest();
 	}
 
 	@Sql("/insert.sql")
