@@ -14,10 +14,11 @@ INSERT INTO tb_events (event_id, category, `date`, description, location, price,
 (4, 'Sports', '2025-02-05 10:00:00', 'A soccer match between the two best teams in the world.', 'Maracanã Stadium, Rio de Janeiro', 79.99, 4.0, 1, 'Soccer Cup 2025', '5f74ce15-982a-4326-8365-80e800d772f7');
 
 INSERT INTO tb_tickets (ticket_id, rating, status, event_id, user_id) VALUES
-(1, NULL, 'APPROVED', 2, '5f74ce15-982a-4326-8365-80e800d772f9'),
-(2, NULL, 'PENDING', 2, '5f74ce15-982a-4326-8365-80e800d772f8'),
-(3, NULL, 'PENDING', 3, '5f74ce15-982a-4326-8365-80e800d772f8'),
-(4, NULL, 'APPROVED', 3, '5f74ce15-982a-4326-8365-80e800d772f7'),
-(5, 4.0, 'APPROVED', 4, '5f74ce15-982a-4326-8365-80e800d772f9'),
-(6, NULL, 'REJECTED', 4, '5f74ce15-982a-4326-8365-80e800d772f8'),
-(7, NULL, 'APPROVED', 4, '5f74ce15-982a-4326-8365-80e800d772f7');
+(2, NULL, 'APPROVED', 2, '5f74ce15-982a-4326-8365-80e800d772f9'),
+(3, NULL, 'REJECTED', 2, '5f74ce15-982a-4326-8365-80e800d772f6'),
+(4, NULL, 'PENDING', 2, '5f74ce15-982a-4326-8365-80e800d772f8'),
+(5, NULL, 'APPROVED', 3, '5f74ce15-982a-4326-8365-80e800d772f8'),
+(6, NULL, 'APPROVED', 3, '5f74ce15-982a-4326-8365-80e800d772f7'),
+(7, 4.0, 'APPROVED', 4, '5f74ce15-982a-4326-8365-80e800d772f9'),
+(8, NULL, 'REJECTED', 4, '5f74ce15-982a-4326-8365-80e800d772f8'),
+(9, NULL, 'APPROVED', 4, '5f74ce15-982a-4326-8365-80e800d772f7');
