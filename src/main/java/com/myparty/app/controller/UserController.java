@@ -20,6 +20,7 @@ import com.myparty.app.controller.dto.CreateUserDto;
 import com.myparty.app.controller.dto.UpdatePasswordDto;
 import com.myparty.app.controller.dto.UpdateUserDto;
 import com.myparty.app.entities.User;
+import com.myparty.app.service.TicketService;
 import com.myparty.app.service.UserService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -28,10 +29,12 @@ import jakarta.validation.Valid;
 public class UserController {
 
 	private final UserService userService;
+	private final TicketService ticketService;
 	private final BCryptPasswordEncoder passwordEncoder;
 
-	public UserController(UserService userService, BCryptPasswordEncoder passwordEncoder) {
+	public UserController(UserService userService, TicketService ticketService, BCryptPasswordEncoder passwordEncoder) {
 		this.userService = userService;
+		this.ticketService = ticketService;
 		this.passwordEncoder = passwordEncoder;
 	}
 
@@ -120,8 +123,12 @@ public class UserController {
 	@DeleteMapping("/users/{userId}")
 	@PreAuthorize("hasAuthority('SCOPE_ADMIN')")
 	public ResponseEntity<Void> deleteUser(@PathVariable UUID userId) {
-		userService.findById(userId)
+		var user = userService.findById(userId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+		if (!ticketService.findByUser(user).isEmpty()) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT, "User has tickets");
+		}
 
 		userService.deleteById(userId);
 		return ResponseEntity.ok().build();

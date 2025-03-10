@@ -66,8 +66,6 @@ public class EventController {
 						}
 				);
 
-		// TODO: send an SMS to the participant users using the Twilio API 2 days before the event (if ticket accepted)
-
 		return ResponseEntity.ok().build();
 	}
 
