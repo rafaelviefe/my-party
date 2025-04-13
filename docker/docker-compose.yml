@@ -10,3 +10,12 @@ services:
       - MYSQL_PASSWORD=123
       - MYSQL_DATABASE=mypartydb
       - MYSQL_ROOT_PASSWORD=123
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
