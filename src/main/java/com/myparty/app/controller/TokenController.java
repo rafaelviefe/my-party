@@ -22,7 +22,6 @@ import jakarta.validation.Valid;
 
 @RestController
 @Tag(name = "Token", description = "Token management")
-@SecurityRequirement(name = SecurityConfig.SECURITY_SCHEME)
 public class TokenController {
 
 	private final JwtEncoder jwtEncoder;
