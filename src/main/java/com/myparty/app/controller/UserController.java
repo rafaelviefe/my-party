@@ -45,7 +45,7 @@ public class UserController {
 		this.passwordEncoder = passwordEncoder;
 	}
 
-	@Operation(summary = "Create a new user", description = "Method to create a new user")
+	@Operation(summary = "Create a new user", description = "Method to create a new user", security = @SecurityRequirement(name = ""))
 	@ApiResponse(responseCode = "200", description = "User created successfully")
 	@ApiResponse(responseCode = "400", description = "Invalid input - validation error")
 	@ApiResponse(responseCode = "409", description = "User already exists")

@@ -83,7 +83,7 @@ public class EventController {
 		return ResponseEntity.ok().build();
 	}
 
-	@Operation(summary = "Get all events", description = "Method to retrieve all events")
+	@Operation(summary = "Get all events", description = "Method to retrieve all events", security = @SecurityRequirement(name = ""))
 	@ApiResponse(responseCode = "200", description = "Events retrieved successfully")
 	@GetMapping("/events")
 	public ResponseEntity<List<EventResponseDto>> getAllEvents() {
@@ -94,7 +94,7 @@ public class EventController {
 		return ResponseEntity.ok(eventDtos);
 	}
 
-	@Operation(summary = "Get event by ID", description = "Method to retrieve an event by ID")
+	@Operation(summary = "Get event by ID", description = "Method to retrieve an event by ID", security = @SecurityRequirement(name = ""))
 	@ApiResponse(responseCode = "200", description = "Event retrieved successfully")
 	@GetMapping("/events/{eventId}")
 	public ResponseEntity<EventResponseDto> getEvent(@PathVariable Long eventId) {
