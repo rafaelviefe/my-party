@@ -16,16 +16,23 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import com.myparty.app.config.SecurityConfig;
 import com.myparty.app.controller.dto.CreateUserDto;
 import com.myparty.app.controller.dto.UpdatePasswordDto;
 import com.myparty.app.controller.dto.UpdateUserDto;
 import com.myparty.app.entities.User;
 import com.myparty.app.service.TicketService;
 import com.myparty.app.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 
 @RestController
+@Tag(name = "User", description = "User management")
+@SecurityRequirement(name = SecurityConfig.SECURITY_SCHEME)
 public class UserController {
 
 	private final UserService userService;
@@ -38,6 +45,10 @@ public class UserController {
 		this.passwordEncoder = passwordEncoder;
 	}
 
+	@Operation(summary = "Create a new user", description = "Method to create a new user")
+	@ApiResponse(responseCode = "200", description = "User created successfully")
+	@ApiResponse(responseCode = "400", description = "Invalid input - validation error")
+	@ApiResponse(responseCode = "409", description = "User already exists")
 	@Transactional
 	@PostMapping("/users")
 	public ResponseEntity<Void> newUser(@RequestBody @Valid CreateUserDto dto) {
@@ -57,12 +68,21 @@ public class UserController {
 		return ResponseEntity.ok().build();
 	}
 
+	@Operation(summary = "Get all users", description = "Method to retrieve all users")
+	@ApiResponse(responseCode = "200", description = "Users retrieved successfully")
+	@ApiResponse(responseCode = "401", description = "Unauthorized")
+	@ApiResponse(responseCode = "403", description = "Insufficient permissions")
 	@GetMapping("/users")
 	@PreAuthorize("hasAnyAuthority('SCOPE_ADMIN', 'SCOPE_ORGANIZER')")
 	public ResponseEntity<List<User>> getUsers() {
 		return ResponseEntity.ok(userService.findAll());
 	}
 
+	@Operation(summary = "Get user by ID", description = "Method to retrieve a user by ID")
+	@ApiResponse(responseCode = "200", description = "User retrieved successfully")
+	@ApiResponse(responseCode = "401", description = "Unauthorized")
+	@ApiResponse(responseCode = "403", description = "Insufficient permissions")
+	@ApiResponse(responseCode = "404", description = "User not found")
 	@GetMapping("/users/{userId}")
 	@PreAuthorize("hasAnyAuthority('SCOPE_ADMIN', 'SCOPE_ORGANIZER')")
 	public ResponseEntity<User> getUser(@PathVariable UUID userId) {
@@ -70,6 +90,10 @@ public class UserController {
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")));
 	}
 
+	@Operation(summary = "Update the logged-in user", description = "Method to update the currently authenticated user")
+	@ApiResponse(responseCode = "200", description = "User updated successfully")
+	@ApiResponse(responseCode = "400", description = "Invalid input - validation error")
+	@ApiResponse(responseCode = "401", description = "Unauthorized")
 	@PutMapping("/users")
 	public ResponseEntity<Void> updateUser(@RequestBody @Valid UpdateUserDto dto, JwtAuthenticationToken token) {
 		var userId = UUID.fromString(token.getName());
@@ -77,6 +101,11 @@ public class UserController {
 		return ResponseEntity.ok().build();
 	}
 
+	@Operation(summary = "Update another user", description = "Method to update another user")
+	@ApiResponse(responseCode = "200", description = "User updated successfully")
+	@ApiResponse(responseCode = "400", description = "Invalid input - validation error")
+	@ApiResponse(responseCode = "401", description = "Unauthorized")
+	@ApiResponse(responseCode = "403", description = "Insufficient permissions")
 	@PutMapping("/users/{userId}")
 	@PreAuthorize("hasAnyAuthority('SCOPE_ADMIN', 'SCOPE_ORGANIZER')")
 	public ResponseEntity<Void> updateOtherUser(@PathVariable UUID userId, @RequestBody @Valid UpdateUserDto dto) {
@@ -84,6 +113,11 @@ public class UserController {
 		return ResponseEntity.ok().build();
 	}
 
+	@Operation(summary = "Update password", description = "Method to update the password of the logged-in user")
+	@ApiResponse(responseCode = "204", description = "Password updated successfully")
+	@ApiResponse(responseCode = "400", description = "Invalid input - validation error")
+	@ApiResponse(responseCode = "401", description = "Unauthorized")
+	@ApiResponse(responseCode = "403", description = "Insufficient permissions or old password is incorrect")
 	@PatchMapping("/users")
 	public ResponseEntity<Void> updatePassword(@RequestBody @Valid UpdatePasswordDto dto, JwtAuthenticationToken token) {
 		var user = userService.findById(UUID.fromString(token.getName()))
@@ -99,6 +133,12 @@ public class UserController {
 		return ResponseEntity.noContent().build();
 	}
 
+	@Operation(summary = "Update user role", description = "Method to update the role of a user")
+	@ApiResponse(responseCode = "200", description = "User role updated successfully")
+	@ApiResponse(responseCode = "401", description = "Unauthorized or requester not found")
+	@ApiResponse(responseCode = "403", description = "Insufficient permissions or role change not allowed")
+	@ApiResponse(responseCode = "404", description = "User not found")
+	@ApiResponse(responseCode = "409", description = "User already has this role")
 	@PatchMapping("/users/{userId}/{role}")
 	@PreAuthorize("hasAnyAuthority('SCOPE_ADMIN', 'SCOPE_ORGANIZER')")
 	public ResponseEntity<Void> updateUserRole(@PathVariable UUID userId, @PathVariable String role, JwtAuthenticationToken token) {
@@ -120,6 +160,12 @@ public class UserController {
 		return ResponseEntity.ok().build();
 	}
 
+	@Operation(summary = "Delete a user", description = "Method to delete a user by ID")
+	@ApiResponse(responseCode = "200", description = "User deleted successfully")
+	@ApiResponse(responseCode = "401", description = "Unauthorized")
+	@ApiResponse(responseCode = "403", description = "Insufficient permissions")
+	@ApiResponse(responseCode = "404", description = "User not found")
+	@ApiResponse(responseCode = "409", description = "User has tickets")
 	@DeleteMapping("/users/{userId}")
 	@PreAuthorize("hasAuthority('SCOPE_ADMIN')")
 	public ResponseEntity<Void> deleteUser(@PathVariable UUID userId) {
