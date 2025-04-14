@@ -10,12 +10,18 @@ import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import com.myparty.app.config.SecurityConfig;
 import com.myparty.app.controller.dto.LoginRequestDto;
 import com.myparty.app.controller.dto.LoginResponseDto;
 import com.myparty.app.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 @RestController
+@Tag(name = "Token", description = "Token management")
 public class TokenController {
 
 	private final JwtEncoder jwtEncoder;
@@ -28,6 +34,10 @@ public class TokenController {
 		this.jwtEncoder = jwtEncoder;
 	}
 
+	@Operation(summary = "Login", description = "Method to login a user")
+	@ApiResponse(responseCode = "200", description = "User logged in successfully")
+	@ApiResponse(responseCode = "400", description = "Invalid input - validation error")
+	@ApiResponse(responseCode = "401", description = "Unauthorized - invalid username or password")
 	@PostMapping("/login")
 	public ResponseEntity<LoginResponseDto> login(@RequestBody @Valid LoginRequestDto loginRequestDto) {
 

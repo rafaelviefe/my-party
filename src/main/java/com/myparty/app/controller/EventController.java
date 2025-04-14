@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import com.myparty.app.config.SecurityConfig;
 import com.myparty.app.controller.dto.EventRevenueDto;
 import com.myparty.app.controller.dto.RatingEventDto;
 import com.myparty.app.controller.dto.RequestEventDto;
@@ -26,10 +27,16 @@ import com.myparty.app.entities.Ticket;
 import com.myparty.app.service.EventService;
 import com.myparty.app.service.TicketService;
 import com.myparty.app.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 
 @RestController
+@Tag(name = "Event", description = "Event management")
+@SecurityRequirement(name = SecurityConfig.SECURITY_SCHEME)
 public class EventController {
 
 	public final EventService eventService;
@@ -42,6 +49,13 @@ public class EventController {
 		this.ticketService = ticketService;
 	}
 
+	@Operation(summary = "Create a new event", description = "Method to create a new event")
+	@ApiResponse(responseCode = "200", description = "Event created successfully")
+	@ApiResponse(responseCode = "400", description = "Invalid input - validation error")
+	@ApiResponse(responseCode = "401", description = "Unauthorized")
+	@ApiResponse(responseCode = "403", description = "Insufficient permissions")
+	@ApiResponse(responseCode = "404", description = "Organizer not found")
+	@ApiResponse(responseCode = "409", description = "Event already exists")
 	@PostMapping("/events")
 	@PreAuthorize("hasAnyAuthority('SCOPE_ADMIN', 'SCOPE_ORGANIZER')")
 	public ResponseEntity<Void> newEvent(@RequestBody @Valid RequestEventDto dto, JwtAuthenticationToken token) {
@@ -69,6 +83,8 @@ public class EventController {
 		return ResponseEntity.ok().build();
 	}
 
+	@Operation(summary = "Get all events", description = "Method to retrieve all events")
+	@ApiResponse(responseCode = "200", description = "Events retrieved successfully")
 	@GetMapping("/events")
 	public ResponseEntity<List<EventResponseDto>> getAllEvents() {
 		List<Event> events = eventService.findAll();
@@ -78,6 +94,8 @@ public class EventController {
 		return ResponseEntity.ok(eventDtos);
 	}
 
+	@Operation(summary = "Get event by ID", description = "Method to retrieve an event by ID")
+	@ApiResponse(responseCode = "200", description = "Event retrieved successfully")
 	@GetMapping("/events/{eventId}")
 	public ResponseEntity<EventResponseDto> getEvent(@PathVariable Long eventId) {
 		var event = eventService.findById(eventId)
@@ -86,10 +104,15 @@ public class EventController {
 		return ResponseEntity.ok(eventService.getEventResponse(event));
 	}
 
+	@Operation(summary = "Get event revenue", description = "Method to retrieve the revenue of an event")
+	@ApiResponse(responseCode = "200", description = "Event revenue retrieved successfully")
+	@ApiResponse(responseCode = "401", description = "Unauthorized")
+	@ApiResponse(responseCode = "403", description = "Insufficient permissions")
+	@ApiResponse(responseCode = "404", description = "Event not found")
 	@GetMapping("/events/{eventId}/revenue")
 	@PreAuthorize("hasAnyAuthority('SCOPE_ADMIN', 'SCOPE_ORGANIZER')")
 	public ResponseEntity<EventRevenueDto> getEventRevenue(@PathVariable Long eventId) {
-		var event = eventService.findById(eventId)
+		eventService.findById(eventId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
 
 		var revenue = ticketService.calculateRevenueByEvent(eventId);
@@ -97,6 +120,10 @@ public class EventController {
 		return ResponseEntity.ok(new EventRevenueDto(eventId, revenue != null ? revenue : 0.0));
 	}
 
+	@Operation(summary = "Get event rating statistics", description = "Method to retrieve the rating statistics of all events")
+	@ApiResponse(responseCode = "200", description = "Event rating statistics retrieved successfully")
+	@ApiResponse(responseCode = "401", description = "Unauthorized")
+	@ApiResponse(responseCode = "403", description = "Insufficient permissions")
 	@GetMapping("/events/rating-statistics")
 	@PreAuthorize("hasAnyAuthority('SCOPE_ADMIN', 'SCOPE_ORGANIZER')")
 	public ResponseEntity<DoubleSummaryStatistics> getEventRatingStatistics() {
@@ -105,6 +132,13 @@ public class EventController {
 		return ResponseEntity.ok(statistics);
 	}
 
+	@Operation(summary = "Update an event", description = "Method to update an event by ID")
+	@ApiResponse(responseCode = "200", description = "Event updated successfully")
+	@ApiResponse(responseCode = "400", description = "Invalid input - validation error")
+	@ApiResponse(responseCode = "401", description = "Unauthorized")
+	@ApiResponse(responseCode = "403", description = "Insufficient permissions")
+	@ApiResponse(responseCode = "404", description = "Event not found")
+	@ApiResponse(responseCode = "409", description = "Event title already exists")
 	@PutMapping("/events/{eventId}")
 	@PreAuthorize("hasAnyAuthority('SCOPE_ADMIN', 'SCOPE_ORGANIZER')")
 	public ResponseEntity<Void> updateEvent(@PathVariable Long eventId, @RequestBody @Valid RequestEventDto dto) {
@@ -127,6 +161,11 @@ public class EventController {
 		return ResponseEntity.ok().build();
 	}
 
+	@Operation(summary = "Update event organizer", description = "Method to update the organizer of an event")
+	@ApiResponse(responseCode = "200", description = "Event organizer updated successfully")
+	@ApiResponse(responseCode = "401", description = "Unauthorized")
+	@ApiResponse(responseCode = "404", description = "Event or organizer not found")
+	@ApiResponse(responseCode = "403", description = "Only the event organizer can update the organizer")
 	@PatchMapping("/events/{eventId}/{organizerId}")
 	@PreAuthorize("hasAnyAuthority('SCOPE_ADMIN', 'SCOPE_ORGANIZER')")
 	public ResponseEntity<Void> updateEventOrganizer(@PathVariable Long eventId, @PathVariable UUID organizerId, JwtAuthenticationToken token) {
@@ -147,6 +186,12 @@ public class EventController {
 		return ResponseEntity.ok().build();
 	}
 
+	@Operation(summary = "Rate an event", description = "Method to rate an event by ID")
+	@ApiResponse(responseCode = "200", description = "Event rated successfully")
+	@ApiResponse(responseCode = "400", description = "Invalid input - validation error")
+	@ApiResponse(responseCode = "401", description = "Unauthorized")
+	@ApiResponse(responseCode = "404", description = "Event or user not found")
+	@ApiResponse(responseCode = "412", description = "Precondition failed - rating or date unexpected")
 	@Transactional
 	@PatchMapping("/events/{eventId}/rating")
 	public ResponseEntity<Void> rateEvent(@PathVariable Long eventId, @RequestBody @Valid RatingEventDto dto, JwtAuthenticationToken token) {
@@ -183,6 +228,11 @@ public class EventController {
 		return ResponseEntity.ok().build();
 	}
 
+	@Operation(summary = "Delete an event", description = "Method to delete an event by ID")
+	@ApiResponse(responseCode = "200", description = "Event deleted successfully")
+	@ApiResponse(responseCode = "401", description = "Unauthorized")
+	@ApiResponse(responseCode = "403", description = "Only the event organizer can delete the event")
+	@ApiResponse(responseCode = "404", description = "Event not found")
 	@Transactional
 	@DeleteMapping("/events/{eventId}")
 	@PreAuthorize("hasAnyAuthority('SCOPE_ADMIN', 'SCOPE_ORGANIZER')")

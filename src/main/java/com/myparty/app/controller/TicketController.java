@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import com.myparty.app.config.SecurityConfig;
 import com.myparty.app.controller.dto.CreateTicketDto;
 import com.myparty.app.controller.dto.TicketResponseDto;
 import com.myparty.app.entities.Ticket;
@@ -22,9 +23,15 @@ import com.myparty.app.service.EventService;
 import com.myparty.app.service.PaymentProcessorService;
 import com.myparty.app.service.TicketService;
 import com.myparty.app.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 @RestController
+@Tag(name = "Ticket", description = "Ticket management")
+@SecurityRequirement(name = SecurityConfig.SECURITY_SCHEME)
 public class TicketController {
 
 	private final TicketService ticketService;
@@ -43,6 +50,11 @@ public class TicketController {
 		this.paymentProcessorService = paymentProcessorService;
 	}
 
+	@Operation(summary = "Create a new ticket", description = "Method to create a new ticket")
+	@ApiResponse(responseCode = "200", description = "Ticket created successfully")
+	@ApiResponse(responseCode = "400", description = "Invalid input or event has already happened")
+	@ApiResponse(responseCode = "401", description = "Unauthorized")
+	@ApiResponse(responseCode = "404", description = "User or event not found")
 	@PostMapping("/tickets")
 	public ResponseEntity<Void> newTicket(@RequestBody @Valid CreateTicketDto dto, JwtAuthenticationToken token) {
 
@@ -63,6 +75,10 @@ public class TicketController {
 		return ResponseEntity.ok().build();
 	}
 
+	@Operation(summary = "Get all tickets", description = "Method to retrieve all tickets")
+	@ApiResponse(responseCode = "200", description = "Tickets retrieved successfully")
+	@ApiResponse(responseCode = "401", description = "Unauthorized")
+	@ApiResponse(responseCode = "403", description = "Insufficient permissions")
 	@GetMapping("/tickets")
 	@PreAuthorize("hasAnyAuthority('SCOPE_ADMIN', 'SCOPE_ORGANIZER')")
 	public ResponseEntity<List<TicketResponseDto>> getTickets() {
@@ -73,6 +89,10 @@ public class TicketController {
 		return ResponseEntity.ok(ticketDtos);
 	}
 
+	@Operation(summary = "Get tickets of the logged-in user", description = "Retrieves all tickets purchased by the currently authenticated user")
+	@ApiResponse(responseCode = "200", description = "Tickets retrieved successfully")
+	@ApiResponse(responseCode = "401", description = "Unauthorized")
+	@ApiResponse(responseCode = "404", description = "User not found")
 	@GetMapping("/tickets/me")
 	public ResponseEntity<List<TicketResponseDto>> getMyTickets(JwtAuthenticationToken token) {
 		var user = userService.findById(UUID.fromString(token.getName()))
@@ -84,6 +104,10 @@ public class TicketController {
 		return ResponseEntity.ok(ticketDtos);
 	}
 
+	@Operation(summary = "Get ticket rating statistics", description = "Retrieves rating statistics for all tickets")
+	@ApiResponse(responseCode = "200", description = "Statistics retrieved successfully")
+	@ApiResponse(responseCode = "401", description = "Unauthorized")
+	@ApiResponse(responseCode = "403", description = "Insufficient permissions")
 	@GetMapping("/tickets/rating-statistics")
 	@PreAuthorize("hasAnyAuthority('SCOPE_ADMIN', 'SCOPE_ORGANIZER')")
 	public ResponseEntity<DoubleSummaryStatistics> getRatingStatistics() {
@@ -92,6 +116,12 @@ public class TicketController {
 		return ResponseEntity.ok(statistics);
 	}
 
+	@Operation(summary = "Retry payment for a ticket", description = "Retries payment for a rejected ticket")
+	@ApiResponse(responseCode = "200", description = "Payment retried successfully")
+	@ApiResponse(responseCode = "400", description = "Ticket is not rejected")
+	@ApiResponse(responseCode = "401", description = "Unauthorized")
+	@ApiResponse(responseCode = "403", description = "You are not allowed to retry this ticket")
+	@ApiResponse(responseCode = "404", description = "User or ticket not found")
 	@PatchMapping("/tickets/{ticketId}/retry")
 	public ResponseEntity<Void> retryPayment(@PathVariable Long ticketId, JwtAuthenticationToken token) {
 		var user = userService.findById(UUID.fromString(token.getName()))
@@ -113,6 +143,12 @@ public class TicketController {
 		return ResponseEntity.ok().build();
 	}
 
+	@Operation(summary = "Cancel a ticket", description = "Cancels a ticket by changing its status to rejected")
+	@ApiResponse(responseCode = "200", description = "Ticket cancelled successfully")
+	@ApiResponse(responseCode = "400", description = "Ticket already rejected or event has already happened")
+	@ApiResponse(responseCode = "401", description = "Unauthorized")
+	@ApiResponse(responseCode = "403", description = "You are not allowed to cancel this ticket")
+	@ApiResponse(responseCode = "404", description = "User or ticket not found")
 	@PatchMapping("/tickets/{ticketId}")
 	@PreAuthorize("hasAnyAuthority('SCOPE_ADMIN', 'SCOPE_ORGANIZER')")
 	public ResponseEntity<Void> cancelTicket(@PathVariable Long ticketId, JwtAuthenticationToken token) {
