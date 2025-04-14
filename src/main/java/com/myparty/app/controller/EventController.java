@@ -112,7 +112,7 @@ public class EventController {
 	@GetMapping("/events/{eventId}/revenue")
 	@PreAuthorize("hasAnyAuthority('SCOPE_ADMIN', 'SCOPE_ORGANIZER')")
 	public ResponseEntity<EventRevenueDto> getEventRevenue(@PathVariable Long eventId) {
-		var event = eventService.findById(eventId)
+		eventService.findById(eventId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
 
 		var revenue = ticketService.calculateRevenueByEvent(eventId);
